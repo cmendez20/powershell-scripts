@@ -11,7 +11,7 @@ do {
     $Failed = $false
     try {
         Write-Host "Deleting all .ldb files in $RecordsPath..." -ForegroundColor Yellow
-        Remove-Item $RecordsPath -Recurse -Include *.ldb
+        Get-ChildItem $RecordsPath * -Include *.ldb -Recurse | Remove-Item
         Write-Host 'Done. .ldb files have been deleted succesfully' -ForegroundColor Yellow
     }
     catch {
@@ -47,7 +47,7 @@ Move-Item -Path $DownloadsPath\Bradford Records_BE_Repaired.mdb -Destination $Do
 
 # In R:\BradfordRecords, delete all .ldb files
 Write-Host "Deleting .ldb files in $RecordsPath AGAIN" -ForegroundColor Yellow
-Remove-Item $RecordsPath -Recurse -Include *.ldb
+Get-ChildItem $RecordsPath * -Include *.ldb -Recurse | Remove-Item
 Write-Host "DONE" -ForegroundColor Yellow
 
 # Force copy and paste Repaired Bradford Records_be.mdb & JPI Records NEW CURRENT.mdb from local downloads into R:\BradfordRecords.
@@ -57,19 +57,19 @@ Copy-Item -Path $DownloadsPath\Bradford Records_be.mdb, $DownloadsPath\JPI Recor
 Write-Host "DONE" -ForegroundColor Yellow
 
 # Test Functionality
-Write-Host "You may now begin testing the files. Opening General Work Database" -ForegroundColor Yellow
+Write-Host "You may now begin testing the files. Opening General Work Database..." -ForegroundColor Yellow
 Write-Host "-----------------------------------------------------------------"
 Write-Host '1) Click the yellow ribbon to enable content and click the down arrow on the "WorkID" field.' -ForegroundColor Yellow
 Write-Host '2) If names appear General Works is operational: Click the "STOP" button to close General Works'
 # Start-Process C:\Users\chrsm\Desktop\Stacher.lnk -Wait
 Start-Process GeneralWork.mdb -Wait
 Write-Host "-----------------------------------------------------------------"
-Write-Host "Now opening JPI Records. If you get any prompts click ok or yes to proceed" -ForegroundColor Yellow
+Write-Host "Now opening JPI Records. If you get any prompts click ok or yes to proceed..." -ForegroundColor Yellow
 Write-Host '1) Click the yellow ribbon to enable content. From here click on the "Jobs/Work Orders Control Center" button' -ForegroundColor Yellow
 Write-Host '2) Next click in the "Job Address" field'
 Write-Host '3) Type two random numbers and see if an address populates. If it does Records is fully functional.'
 Write-Host '4) Click the "Done" button at the top to go back to the main form screen'
-Write-Host '5) Next click "Close Program" to close JPI records'
+Write-Host '5) Finally click "Close Program" to close JPI records'
 Start-Process JPI Records.mdb -Wait
 
 Write-Host "Now call Megan or Nick to reboot their computers and test access"
