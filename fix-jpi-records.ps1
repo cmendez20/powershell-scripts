@@ -1,5 +1,5 @@
-$DownloadsPath = "C:\Users\chrsm\Downloads"
-$RecordsPath = "R:\BradfordRecords"
+$DownloadsPath = "C:\Users\knightms\Downloads"
+$RecordsPath = "\\192.168.1.124\datto-nas\SystemX\Database\BradfordRecords"
 
 # sign out all users except knightms
 Write-Host "Signing out all users except knightms" -ForegroundColor Yellow
