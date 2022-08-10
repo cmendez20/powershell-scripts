@@ -6,6 +6,9 @@ Write-Host "Signing out all users except knightms..." -ForegroundColor Yellow
 quser | Select-String “Disc” | ForEach-Object {logoff ($_.tostring() -split ‘ +’)[2]}
 Write-Host "DONE" -ForegroundColor Yellow
 
+# Kills all processes of MSACCESS.exe
+Stop-Process -Name MSACCESS
+
 # In BradfordRecords, delete all .ldb files
 do {
     $Failed = $false
@@ -62,7 +65,7 @@ Write-Host "-----------------------------------------------------------------"
 Write-Host '1) Click the yellow ribbon to enable content and click the down arrow on the "WorkID" field.' -ForegroundColor Yellow
 Write-Host '2) If names appear General Works is operational: Click the "STOP" button to close General Works'
 # Start-Process C:\Users\chrsm\Desktop\Stacher.lnk -Wait
-Start-Process GeneralWork.mdb -Wait
+Start-Process "\\192.168.1.124\datto-nas\SystemX\Database\GeneralWork CURRENT.mdb" -Wait
 Write-Host "-----------------------------------------------------------------"
 Write-Host "Now opening JPI Records. If you get any prompts click ok or yes to proceed..." -ForegroundColor Yellow
 Write-Host '1) Click the yellow ribbon to enable content. From here click on the "Jobs/Work Orders Control Center" button' -ForegroundColor Yellow
@@ -70,7 +73,7 @@ Write-Host '2) Next click in the "Job Address" field'
 Write-Host '3) Type two random numbers and see if an address populates. If it does Records is fully functional.'
 Write-Host '4) Click the "Done" button at the top to go back to the main form screen'
 Write-Host '5) Finally click "Close Program" to close JPI records'
-Start-Process JPI Records.mdb -Wait
+Start-Process "R:\BradfordRecords\JPI Records NEW CURRENT.mdb" -Wait
 
 Write-Host "Now call Megan or Nick to reboot their computers and test access"
 Write-Host "If they get any prompts tell them to continue"
