@@ -3,11 +3,12 @@ $RecordsPath = "\\192.168.1.124\datto-nas\SystemX\Database\BradfordRecords"
 
 # sign out all users except knightms
 Write-Host "Signing out all users except knightms..." -ForegroundColor Yellow
-quser | Select-String “Disc” | ForEach-Object {logoff ($_.tostring() -split ‘ +’)[2]}
+((Get-WmiObject -Class Win32_Process).getowner().user | Select-Object  -Unique) |ForEach-Object {query session $_ | where-object {($_ -notmatch 'console') -and ($_ -match 'disc') -and ($_ -notmatch 'services')}| logoff}
+query session | Where-Object{ ($_ -notmatch '^ SESSIONNAME') -and ($_ -notmatch '<username>') }
+query session $_ | Where-Object { ($_ -match 'console') -and ($_ -match 'disc') } | logoff
+# quser | Select-String “Disc” | ForEach-Object {logoff ($_.tostring() -split ‘ +’)[2]}
+# (quser) -notlike ">$env:USERNAME *" | Select-Object -Skip 1 | ForEach-Object { logoff ($_ -split ' +')[-5] }
 Write-Host "DONE" -ForegroundColor Yellow
-
-# Kills all processes of MSACCESS.exe
-Stop-Process -Name MSACCESS
 
 # In BradfordRecords, delete all .ldb files
 do {
@@ -19,6 +20,8 @@ do {
     }
     catch {
         Write-Host 'Unable to delete .ldb files, reboot Datto device...' -ForegroundColor Yellow
+        # Kills all processes of MSACCESS.exe
+        Stop-Process -Name MSACCESS
         # Start-Process "https://auth.datto.com/login"
         Read-Host -Prompt "After reboot, press any key to continue"
         $Failed = $true
