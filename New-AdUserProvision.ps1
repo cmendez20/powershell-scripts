@@ -9,7 +9,7 @@ param (
 	
 	[Parameter(Mandatory, ValueFromPipelineByPropertyname)]
 	[ValidateNotNull()]
-  [AllowEmptyString()]
+    [AllowEmptyString()]
 	[string]$MiddleInitial,
 	
 	# [Parameter(Mandatory, ValueFromPipelineByPropertyname)]
@@ -18,24 +18,24 @@ param (
 	
 	[Parameter(Mandatory, ValueFromPipelineByPropertyname)]
 	[ValidateNotNull()]
-  [AllowEmptyString()]
+    [AllowEmptyString()]
 	[string]$Title,
 	
 	[Parameter(ValueFromPipelineByPropertyname)]
 	[ValidateNotNullOrEmpty()]
-	[string]$Location = 'OU=_USERS',
-	
-	[Parameter()]
-	[ValidateNotNullOrEmpty()]
-	[string]$DefaultGroup = '1 EMPLOYEES',
-	
-	[Parameter()]
-	[ValidateNotNullOrEmpty()]
-	[string]$DefaultPassword = "$($FirstName.SubString(0, 1).ToUpper())$($LastName.SubString(0, 1).ToUpper())@welcome$(get-date -f yyyy)"
+	[string]$Location = 'OU=Users, OU=ASD',
 	
 	# [Parameter()]
-	# [ValidateScript({ Test-Path -Path $_ })]
-	# [string]$BaseHomeFolderPath = '\\dc\Users'
+	# [ValidateNotNullOrEmpty()]
+	# [string]$DefaultGroup = '1 EMPLOYEES',
+	
+	[Parameter()]
+	[ValidateNotNullOrEmpty()]
+	[string]$DefaultPassword = "$($FirstName.SubString(0, 1).ToUpper())$($LastName.SubString(0, 1).ToUpper())@welcome$(get-date -f yyyy)",
+	
+	[Parameter()]
+	[ValidateScript({ Test-Path -Path $_ })]
+	[string]$BaseHomeFolderPath = '\\data\Users'
 )
 
 ## Find the distinguished name of the domain the current computer is a part of.
@@ -69,8 +69,8 @@ else
 }
 #endregion
 
-#gets domain name
-$Domain = Get-ADForest
+#gets upn suffix 
+$Domain = Get-adforest | select UPNSuffixes -ExpandProperty UPNSuffixes
 
 #region Ensure the OU the user's going into exists
 $ouDN = "$Location,$DomainDn"
@@ -81,10 +81,10 @@ if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$ouDN'"))
 #endregion
 
 #region Ensure the group the user's going into exists
-if (-not (Get-ADGroup -Filter "Name -eq '$DefaultGroup'"))
-{
-	throw "The group [$($DefaultGroup)] does not exist. Can't add the user into this group."
-}
+# if (-not (Get-ADGroup -Filter "Name -eq '$DefaultGroup'"))
+# {
+# 	throw "The group [$($DefaultGroup)] does not exist. Can't add the user into this group."
+# }
 # if (-not (Get-ADGroup -Filter "Name -eq '$Department'"))
 # {
 # 	throw "The group [$($Department)] does not exist. Can't add the user to this group."
@@ -92,11 +92,11 @@ if (-not (Get-ADGroup -Filter "Name -eq '$DefaultGroup'"))
 #endregion
 
 #region Ensure the home folder to create doesn't already exist
-# $homeFolderPath = "$BaseHomeFolderPath\$UserName"
-# if (Test-Path -Path $homeFolderPath)
-# {
-# 	throw "The home folder path [$homeFolderPath] already exists."
-# }
+$homeFolderPath = "$BaseHomeFolderPath\$UserName"
+if (Test-Path -Path $homeFolderPath)
+{
+	throw "The home folder path [$homeFolderPath] already exists."
+}
 #endregion
 
 #region Create the new user
@@ -108,7 +108,7 @@ $NewUserParams = @{
 	'Title' = $Title
 	# 'Department' = $Department
 	'SamAccountName' = $Username
-  'DisplayName' = $FirstName + ' ' + $LastName
+    'DisplayName' = $FirstName + ' ' + $LastName
 	'AccountPassword' = (ConvertTo-SecureString $DefaultPassword -AsPlainText -Force)
 	'Enabled' = $true
 	'Initials' = $MiddleInitial
@@ -120,15 +120,25 @@ New-AdUser @NewUserParams
 #endregion
 
 #region Add user to groups
-Write-Verbose -Message "Adding the user account [$($Username)] to the group [$($DefaultGroup)]"
-Add-ADGroupMember -Members $Username -Identity $DefaultGroup
+$Groups = @("1 ASD","1 Hourly Employees","1 Local Employees")
+# Add-ADGroupMember -Members $Username -Identity $DefaultGroup
+ForEach ($Group in $Groups) {
+	Write-Verbose -Message "Adding the user account [$($Username)] to the group [$($Group)]"
+	Add-ADPrincipalGroupMembership $Username -MemberOf $Group
+	}
 # Write-Verbose -Message "Adding the user account [$($Username)] to the group [$($Department)]"
 # Add-ADGroupMember -Members $Username -Identity $Department
 #endregion
 
+# Connect home folder 
+Set-ADUser -Identity $Username -HomeDirectory $homeFolderPath -HomeDrive J
+
 #region Create the home folder
-# Write-Verbose -message "Creating the home folder [$homeFolderPath]..."
-# $null = mkdir $homeFolderPath
+Write-Verbose -message "Creating the home folder [$homeFolderPath]..."
+$null = mkdir $homeFolderPath
 #endregion
 
-Write-Verbose -Message "[$($Username)] has been created]"
+# Force Azure AD Sync
+Start-ADSyncSyncCycle -policyType Delta
+
+Write-Verbose -Message "[$($Username)] has been created"
