@@ -1,9 +1,9 @@
 
-$folderNames = Get-ChildItem -Directory | Select-Object -ExpandProperty Name
+$folderNames = Get-ChildItem -Directory -Exclude owilliams, test | Select-Object -ExpandProperty Name
 
 # loops through all folders
 For ($i=0; $i -lt $folderNames.length; $i++) {
-  $folderPath = "\\dc\data\dataTen\$($folderNames[$i])"
+  $folderPath = "\\dc\data\dataEleven\$($folderNames[$i])"
   Write-Host "Removing inheritance for $($folderNames[$i])" -ForegroundColor cyan -BackgroundColor black
 
   # get current ACL for folder
