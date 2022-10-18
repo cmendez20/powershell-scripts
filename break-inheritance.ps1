@@ -1,9 +1,13 @@
 
-$folderNames = Get-ChildItem -Directory -Exclude owilliams, test | Select-Object -ExpandProperty Name
+$excluded = @(
+  'owilliams',
+  'test'
+  )
+$folderNames = Get-ChildItem -Directory -Exclude $excluded | Select-Object -ExpandProperty Name
 
 # loops through all folders
 For ($i=0; $i -lt $folderNames.length; $i++) {
-  $folderPath = "\\dc\data\dataEleven\$($folderNames[$i])"
+  $folderPath = "\\dc\data\dataTwelve\$($folderNames[$i])"
   Write-Host "Removing inheritance for $($folderNames[$i])" -ForegroundColor cyan -BackgroundColor black
 
   # get current ACL for folder
@@ -51,6 +55,8 @@ For ($i=0; $i -lt $folderNames.length; $i++) {
   # icacls.exe $folderPath /remove "Temporary 1 User" /T /C
   Write-Host "Removing Everyone permissions group from $($folderNames[$i]) folder" -ForegroundColor cyan -BackgroundColor black
   icacls.exe $folderPath /remove Everyone /T /C
+
+  Write-Host "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 }
 
 
