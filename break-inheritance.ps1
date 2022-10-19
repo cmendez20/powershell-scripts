@@ -1,13 +1,23 @@
 
 $excluded = @(
-  'owilliams',
-  'test'
+  'Amanda',
+  'Amber',
+  'Amy',
+  'Andrea',
+  'ARCHIVED FILES',
+  'Belinda',
+  'Bonnie',
+  'faxes',
+  'I9',
+  'Reception_SP',
+  'Reception_TS',
+  'SAMS_I9'
   )
 $folderNames = Get-ChildItem -Directory -Exclude $excluded | Select-Object -ExpandProperty Name
 
 # loops through all folders
 For ($i=0; $i -lt $folderNames.length; $i++) {
-  $folderPath = "\\dc\data\dataTwelve\$($folderNames[$i])"
+  $folderPath = "\\ts-main\Scans\$($folderNames[$i])"
   Write-Host "Removing inheritance for $($folderNames[$i])" -ForegroundColor cyan -BackgroundColor black
 
   # get current ACL for folder
@@ -16,14 +26,14 @@ For ($i=0; $i -lt $folderNames.length; $i++) {
   # disables inheritance
   $Acl.SetAccessRuleProtection($true,$true)
 
-  # # filter for specific ACE you want to remove
-  $AceToRemove = $Acl.Access | Where-Object {($_.IdentityReference -eq 'MYDOMAIN\Domain Users')}
-  # $AceToRemove = New-Object System.Security.AccessControl.FileSystemAccessRule("MYDOMAIN\Domain Users", "FullControl", "Allow")
+  # # # filter for specific ACE you want to remove
+  # $AceToRemove = $Acl.Access | Where-Object {($_.IdentityReference -eq 'MYDOMAIN\Domain Users')}
+  # # $AceToRemove = New-Object System.Security.AccessControl.FileSystemAccessRule("MYDOMAIN\Domain Users", "FullControl", "Allow")
 
-  # # # removes ACE
-  $Acl.RemoveAccessRule($AceToRemove)
+  # # # # removes ACE
+  # $Acl.RemoveAccessRule($AceToRemove)
 
-  # # make changes stick
+  # # # make changes stick
   Set-Acl -Path $folderPath -AclObject $Acl
 
   # adds domain user
@@ -50,7 +60,10 @@ For ($i=0; $i -lt $folderNames.length; $i++) {
 
 
      
-  icacls.exe $folderPath /remove "Domain Users" /T /C
+  # icacls.exe $folderPath /remove "Domain Users" /T /C
+  icacls.exe $folderPath /remove Temp1
+  icacls.exe $folderPath /remove Temp2
+
   # icacls.exe $folderPath /remove "Temporary 2 User" /T /C
   # icacls.exe $folderPath /remove "Temporary 1 User" /T /C
   Write-Host "Removing Everyone permissions group from $($folderNames[$i]) folder" -ForegroundColor cyan -BackgroundColor black
