@@ -1,3 +1,4 @@
+## Original Filter
 # Set-DynamicDistributionGroup -Identity 'All Staff' -RecipientFilter "((((((RecipientType -eq 'UserMailbox') -and (-not(RecipientTypeDetailsValue -eq 'SharedMailbox'))))
 # -and (-not(RecipientTypeDetailsValue -eq 'RoomMailbox')))) -and (-not(Name -like 'SystemMailbox{*'))
 # -and -not(UserAccountControl -eq 'AccountDisabled, NormalAccount')
@@ -13,7 +14,6 @@
 
 # Set-DynamicDistributionGroup -identity "All Staff" -RecipientFilter {((RecipientType -eq 'UserMailbox') -and -not (RecipientTypeDetailsValue -eq 'RoomMailbox') `
 # -and -not (RecipientTypeDetailsValue -eq 'SharedMailbox') -and -not (UserAccountControl -eq "AccountDisabled, NormalAccount"))} 
-
 
 # -and -not (RecipientTypeDetailsValue -eq 'RoomMailbox') 
 # -and -not(UserAccountControl -eq 'AccountDisabled, NormalAccount')
