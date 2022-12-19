@@ -1,0 +1,4 @@
+#TYPE Selected.Microsoft.Open.AzureAD.Model.LicenseDetail
+"License","SkuId","User"
+"DEVELOPERPACK_E5","c42b9cae-ea4f-4ab7-9717-81576235ccac","Lee Gu"
+"DEVELOPERPACK_E5","c42b9cae-ea4f-4ab7-9717-81576235ccac","Harry Fields"

@@ -1,15 +1,16 @@
-$userToOffboard = "afergy@s22f.onmicrosoft.com"
+$userToOffboard = "hfields@s22f.onmicrosoft.com"
 $displayName = Get-AzureADUser -ObjectID $userToOffboard 
 
 
 write-host "Removing License from user." -ForegroundColor Green
 $AssignedLicensesTable = Get-AzureADUser -ObjectId $userToOffboard | Get-AzureADUserLicenseDetail | Select-Object @{n="License"; e = { $_.SkuPartNumber }}, skuid 
 
-# $AssignedLicensesTable | Get-Member
+
 
 $AssignedLicensesTable | Add-Member -MemberType NoteProperty  -Name 'User' -Value $displayName.DisplayName
 
-$AssignedLicensesTable | Get-Member
+
+# $AssignedLicensesTable | Get-Member
 
 
 
@@ -31,6 +32,8 @@ write-host "Removed licenses:"
 # $AssignedLicensesTable.GetType()
 $AssignedLicensesTable 
 
-
+# $AssignedLicensesTable | Get-Member 
 # $AssignedLicensesTable = $AssignedLicensesTable | Add-Member -MemberType NoteProperty "User" -Value $displayName 
-# $AssignedLicensesTable | Export-CSV 'offboard-user-data.csv' -Append -Force 
+# have to delete old csv sheet and start new one 
+write-host "Export CSV to current directory.."
+$AssignedLicensesTable | Export-CSV 'offboard-user-data-test.csv' -Append -Force 

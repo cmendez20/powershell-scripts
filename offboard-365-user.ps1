@@ -1,6 +1,6 @@
 #########User info######
-$userToOffboard = "afergy@s22f.onmicrosoft.com"
-$displayName = Get-AzureADUser -ObjectID $userToOffboard | Select-Object DisplayName
+$userToOffboard = "hstyles@s22f.onmicrosoft.com"
+$displayName = Get-AzureADUser -ObjectID $userToOffboard 
 # $CustomerDefaultDomainname = "gastroclinicsa.com"
 
 write-host "Logging into Azure AD." -ForegroundColor Green
@@ -49,7 +49,7 @@ Get-AzureADUser -SearchString $userToOffboard | Revoke-AzureADUserAllRefreshToke
 
 
 write-host "Removing License from user." -ForegroundColor Green
-$AssignedLicensesTable = Get-AzureADUser -ObjectId $userToOffboard | Get-AzureADUserLicenseDetail | Select-Object @{n = "License"; e = { $_.SkuPartNumber }; name = $displayName}, skuid
+$AssignedLicensesTable = Get-AzureADUser -ObjectId $userToOffboard | Get-AzureADUserLicenseDetail | Select-Object @{n = "License"; e = { $_.SkuPartNumber }}, skuid
 if ($AssignedLicensesTable) {
 $body = @{
         addLicenses    = @()
@@ -61,6 +61,5 @@ Set-AzureADUserLicense -ObjectId $userToOffboard -AssignedLicenses $body
 write-host "Removed licenses:"
 $AssignedLicensesTable
 
-
-# $AssignedLicensesTable = $AssignedLicensesTable | Add-Member -MemberType NoteProperty "User" -Value $displayName 
+$AssignedLicensesTable | Add-Member -MemberType NoteProperty  -Name 'User' -Value $displayName.DisplayName
 $AssignedLicensesTable | Export-CSV 'offboard-user-data.csv' -Append -Force 
