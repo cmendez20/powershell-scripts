@@ -1,5 +1,6 @@
 #########User info######
-$userToOffboard = "Adriana@gastroclinicsa.com"
+$userToOffboard = "afergy@s22f.onmicrosoft.com"
+$displayName = Get-AzureADUser -ObjectID $userToOffboard | Select-Object DisplayName
 # $CustomerDefaultDomainname = "gastroclinicsa.com"
 
 write-host "Logging into Azure AD." -ForegroundColor Green
@@ -14,6 +15,8 @@ Get-AzureADUserMembership -ObjectId $MemberID -All $true | Where-Object { $_.Obj
     write-host "    Removing using from $($_.displayname)" -ForegroundColor green
     Remove-AzureADGroupMember -ObjectId $_.ObjectID -MemberId $MemberID
 }
+
+
 write-host "Removing users from Unified Groups and Teams" -ForegroundColor Green
 $OffboardingDN = (get-mailbox -Identity $userToOffboard -IncludeInactiveMailbox).DistinguishedName
 Get-Recipient -Filter "Members -eq '$OffboardingDN'" -RecipientTypeDetails 'GroupMailbox' | foreach-object {
@@ -37,14 +40,16 @@ Set-Mailbox $userToOffboard -HiddenFromAddressListsEnabled $true
 
 
 #Set Sign in Blocked
+write-host "Blocking user's sign-in" -ForegroundColor Green
 Set-AzureADUser -ObjectId $userToOffboard -AccountEnabled $false
 
 #Disconnect Existing Sessions
+write-host "Signing user out of all 365 sessions" -ForegroundColor Green
 Get-AzureADUser -SearchString $userToOffboard | Revoke-AzureADUserAllRefreshToken
 
 
 write-host "Removing License from user." -ForegroundColor Green
-$AssignedLicensesTable = Get-AzureADUser -ObjectId $userToOffboard | Get-AzureADUserLicenseDetail | Select-Object @{n = "License"; e = { $_.SkuPartNumber } }, skuid
+$AssignedLicensesTable = Get-AzureADUser -ObjectId $userToOffboard | Get-AzureADUserLicenseDetail | Select-Object @{n = "License"; e = { $_.SkuPartNumber }; name = $displayName}, skuid
 if ($AssignedLicensesTable) {
 $body = @{
         addLicenses    = @()
@@ -54,4 +59,8 @@ Set-AzureADUserLicense -ObjectId $userToOffboard -AssignedLicenses $body
 }
 
 write-host "Removed licenses:"
+$AssignedLicensesTable
+
+
+# $AssignedLicensesTable = $AssignedLicensesTable | Add-Member -MemberType NoteProperty "User" -Value $displayName 
 $AssignedLicensesTable | Export-CSV 'offboard-user-data.csv' -Append -Force 
