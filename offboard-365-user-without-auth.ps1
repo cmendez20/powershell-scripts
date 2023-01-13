@@ -1,15 +1,7 @@
 #########User info######
-$userToOffboard = "Adriana@gastroclinicsa.com"
-
-# $CustomerDefaultDomainname = "gastroclinicsa.com"
-
-write-host "Logging into Azure AD." -ForegroundColor Green
-Connect-AzureAD
-
-write-host "Connecting to Exchange Online" -ForegroundColor Green
-Connect-ExchangeOnline
-
+$userToOffboard = "wendyo@gastroclinicsa.com"
 $displayName = Get-AzureADUser -ObjectID $userToOffboard 
+# $CustomerDefaultDomainname = "gastroclinicsa.com"
 
 write-host "Removing users from Azure AD Groups" -ForegroundColor Green
 $MemberID = (Get-AzureADUser -ObjectId $userToOffboard).objectId
@@ -29,7 +21,6 @@ write-host "Removing users from Distribution Groups" -ForegroundColor Green
 Get-Recipient -Filter "Members -eq '$OffboardingDN'" | foreach-object {
     write-host "    Removing using from $($_.name)" -ForegroundColor green
 Remove-DistributionGroupMember -Identity $_.ExternalDirectoryObjectId -Member $OffboardingDN -BypassSecurityGroupManagerCheck -Confirm:$false }
-
 
 #Set Sign in Blocked
 write-host "Blocking user's sign-in" -ForegroundColor Green
